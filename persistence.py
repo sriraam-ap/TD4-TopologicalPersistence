@@ -1,6 +1,7 @@
 import sys
 from typing import List
 import locale
+import pandas as pd
 
 class Simplex:
     def __init__(self, line: str):
@@ -25,6 +26,19 @@ def read_filtration(filename: str) -> List[Simplex]:
             filtration.append(Simplex(line.strip()))
     
     return filtration
+
+def convert_filtration_df(filtration: list) -> pd.DataFrame:
+    val_list = []
+    dim_list = []
+    vert_list = []
+    for i, s in enumerate(filtration):
+        print(f"{i}/{len(filtration)}")
+        val_list.append(s.val)
+        dim_list.append(s.dim)
+        vert_list.append(s.vert)
+    df = pd.DataFrame({"val": val_list, "dim": dim_list, "vert": vert_list})
+    df_sorted = df.sort_values(by=['val', 'dim'])
+    return df_sorted
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
