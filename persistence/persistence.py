@@ -1,7 +1,10 @@
 import sys
+import copy
 from typing import List
 import locale
+
 import pandas as pd
+
 
 class Simplex:
     def __init__(self, line: str):
@@ -31,14 +34,21 @@ def convert_filtration_df(filtration: list) -> pd.DataFrame:
     val_list = []
     dim_list = []
     vert_list = []
+
+    print("--- convert_filtration_df: collecting data ---")
     for i, s in enumerate(filtration):
         print(f"{i}/{len(filtration)}")
         val_list.append(s.val)
         dim_list.append(s.dim)
         vert_list.append(s.vert)
+
+    print("--- convert_filtration_df: creating data frame ---")
     df = pd.DataFrame({"val": val_list, "dim": dim_list, "vert": vert_list})
+
+    print("--- convert_filtration_df: sorting ---")
     df_sorted = df.sort_values(by=['val', 'dim'])
     return df_sorted
+
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
