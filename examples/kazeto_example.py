@@ -6,22 +6,24 @@ from persistence.boundary_matrix import get_boundary_matrix
 from persistence.boundary_matrix import get_sparse_boundary_matrix
 from persistence.reduce_boundary_matrix import BoundaryMatrixReducer
 
+
 # filtration = read_filtration("./filtrations/filtration_A.txt")
 # filtration = read_filtration("./filtrations/filtration_B.txt")
 # filtration = read_filtration("./filtrations/filtration_C.txt")
 # filtration = read_filtration("./filtrations/filtration_D.txt")
-filtration = read_filtration("./tests/testcases/filtration_1.txt")
+# filtration = read_filtration("./tests/testcases/filtration_1.txt")
 # filtration = read_filtration("./tests/testcases/filtration_2.txt")
-
+filtration = read_filtration("./filtrations/filtration_on_TD4_homepage.txt")
 
 # s = filtration[0]
-# df = convert_filtration_df(filtration)
+df = convert_filtration_df(filtration)
 
-# bm = get_boundary_matrix(df)
+bm = get_boundary_matrix(df)
 # bm_reducer = BoundaryMatrixReducer(verbose=True)
 # bm_reduced = bm_reducer.reduce(bm, return_copy=False)
 
-
+from persistence.boundary_matrix import get_sparse_boundary_matrix
+from persistence.persistence import convert_filtration_df
 from persistence.reduce_boundary_matrix import SparseBoundaryMatrixReducer
 df = convert_filtration_df(filtration)
 sbm = get_sparse_boundary_matrix(df)
@@ -58,7 +60,7 @@ i = max(L)
 is_occupied = i in sbm2 # No len=0 list in sbm2, so just checking existence of i is OK
 R = []
 
-L
+
 sbm2[i]
 
 while len(L) > 0 and is_occupied:

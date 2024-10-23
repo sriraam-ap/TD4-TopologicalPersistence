@@ -1,6 +1,7 @@
 import copy
 
 import pandas as pd
+from numba import jit
 
 
 class SparseBoundaryMatrixReducer(object):
@@ -140,6 +141,7 @@ class SparseBoundaryMatrixReducer(object):
 
             i = lowest_row_idx_dict[j] # lowest row index doesn't change after adding j col to j+t col since it's upper triangular matrix
             col_indices_to_add = row2col[i][1:]
+            print(f"number of col_indices_to_add: {len(col_indices_to_add)}")
             for col_idx_to_add in col_indices_to_add:
                 nonzero_rows_at_j_col = set(col2row[j]) if j in col2row else set()
                 nonzero_rows_at_col_to_add = set(col2row[col_idx_to_add]) if col_idx_to_add in col2row else set()
