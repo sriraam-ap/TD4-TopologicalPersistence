@@ -180,7 +180,7 @@ def write_barcode_to_file(persistence_pairs, filename):
 
 def main():
     if len(sys.argv) != 2:
-        print("Usage: python sriraam.py <filtration_file>")
+        print("Usage: python main.py <path to filtration_file>")
         sys.exit(1)
 
     filename = sys.argv[1]
