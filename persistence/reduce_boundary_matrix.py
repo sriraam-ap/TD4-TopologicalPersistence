@@ -1,214 +1,142 @@
 import copy
 
-import pandas as pd
+from .boundary_matrix import sbm_col2row_to_row2col
 
 
 class SparseBoundaryMatrixReducer(object):
     def __init__(self, verbose: bool=True):
         self._verbose = verbose # for debug
 
-    def _sbm_df_to_sbm_dict(self, sbm_df: pd.DataFrame) -> dict:
-        _sbm_df = sbm_df.reset_index()
-        sbm_dict = {col: _sbm_df[col].to_list() for col in _sbm_df.columns}
-        return sbm_dict
-    
-    def _sbm_dict_to_sbm_df(self, sbm_dict: dict) -> pd.DataFrame:
-        sbm_df = pd.DataFrame(sbm_dict)
-        sbm_df = sbm_df.set_index(keys=["row", "col"])
-        return sbm_df
+    def reduce1(self, sbm_col2row: dict, return_copy=True) -> dict:
+        """Use reduce2 method.
+        The reduce1 is just for comparing two slightly different reduction algorithm.
 
-    def _get_lowest_row_idx_dict(self, sbm_df: pd.DataFrame) -> int:
+        We will change input and output format but now it's like below
+
+        input
+        In [3]: sbm_col2row
+        Out[3]: {3: {0, 1}, 4: {1, 2}, 5: {0, 2}, 6: {3, 4, 5}}
+
+        output
+        In [2]: sbm_reduced
+        Out[2]: [set(), set(), set(), {0, 1}, {1, 2}, {0, 2}, {3, 4, 5}]
+
+        The reduce1 searches columns to add by row-wise
         """
-        Parameters
-        ----------
+        _sbm_col2row = copy.deepcopy(sbm_col2row) if return_copy else sbm_col2row
 
-        Returns
-        -------
-        lowest_row_idx_dict : dict
-            key: column idx
-            val: lowest row idx
-            No column index in this dict means zero column
+        sbm = [set() for _ in range(max(_sbm_col2row.keys())+1)]
+        for j in _sbm_col2row.keys():
+            sbm[j] = _sbm_col2row[j]
 
-            In [12]: lowest_row_idx_dict
-            Out[12]: {3: 1, 4: 2, 5: 2, 6: 5}
-        """
-        lowest_row_idx_dict = {}
-        _sbm_df_sorted = sbm_df.sort_values(["col", "row"])
-        sbm = self._sbm_df_to_sbm_dict(_sbm_df_sorted)
+        n = len(sbm)
+        previous_pivots_column = [None] * n
 
-        N = len(sbm["col"])
+        for j in range(len(sbm)):
+            print(f"--- reduce: {j}/{n} ---")
+            j_col = sbm[j]
+            while j_col:
+                pivot_row_index = max(j_col)
+                # print(f"j: {j}, pivot_row_index: {pivot_row_index}")
 
-        for i in range(N):
-            print(f"{i}/{N}")
-            lowest_row_idx_dict[sbm["col"][i]] = sbm["row"][i]
-            # assuming sorted on row gived specific column
-            # ex.
-            # row: [6, 7, 8]
-            # col: [9 ,9 ,9]
-            # val: [1, 1, 1]
+                if previous_pivots_column[pivot_row_index] is None:
+                    previous_pivots_column[pivot_row_index] = j
+                    break
 
-        return lowest_row_idx_dict
+                j_col ^= sbm[previous_pivots_column[pivot_row_index]]
 
-    def _get_freq_of_low_dict(self, lowest_row_idx_dict: dict) -> dict:
-        """
-        Parameters
-        ----------
-
-        Returns
-        -------
-        freq_of_low_dict : dict
-        key : lowest row index
-        value : list of column indices of boundary matrix whose lowest row index is key
-
-        In [2]: freq_of_low_dict
-        Out[2]: {1: [3], 2: [4, 5], 5: [6]}
-        """
-        if self._verbose:
-            print("--- BoundaryMatrixReducer._get_freq_of_low_dict ---")
-
-        freq_of_low_dict = {}
-        for col_idx, lowest_row_idx in lowest_row_idx_dict.items():
-            if not lowest_row_idx in freq_of_low_dict:
-                freq_of_low_dict[lowest_row_idx] = [col_idx]
-            else:
-                freq_of_low_dict[lowest_row_idx].append(col_idx)
-
-        return freq_of_low_dict
-    
-    def reduce(self, sbm: list) -> list:
-        """
-        from persistence import read_filtration
-        from persistence import SparseBoundaryMatrixReducer
-        filtration = read_filtration("./tests/testcases/filtration_1.txt")
-        df = convert_filtration_df(filtration)
-        sbm = get_sparse_boundary_matrix(df)
-        sbm_reducer = SparseBoundaryMatrixReducer(verbose=True)
-        sbm_reduced = sbm_reducer.reduce(sbm)
-        """
-        sbm_df = self._sbm_dict_to_sbm_df(sbm)
-        lowest_row_idx_dict = self._get_lowest_row_idx_dict(sbm_df)
-        freq_of_low_dict = self._get_freq_of_low_dict(lowest_row_idx_dict)
-
-        _counter = 0
-        while max(list(map(len, freq_of_low_dict.values()))) > 1:
-            if self._verbose:
-                print(f"---{_counter}---")
-                print(freq_of_low_dict)
-
-            for _counter, (key, val) in enumerate(freq_of_low_dict.items()):
-                print(f"{_counter}/{len(freq_of_low_dict)}")
-                if len(val) > 1:
-                    for j in val[1:]: # iterating on column indices where val[0] < j
-                        for i in range(0, j): # Since boundary matrix is upper triangular matrix, rows after j are 0.
-                            print(f"i={i}/{j}, j={j}/{val[1:]}")
-                            if (i, val[0]) in sbm_df.index and (i, j) in sbm_df.index:
-                                # 1 + 1 case
-                                sbm_df = sbm_df.drop((i, j))
-                            elif (i, val[0]) in sbm_df.index and not (i, j) in sbm_df.index:
-                                # 1 + 0 case
-                                # adding new row in this case
-                                _sbm_df = sbm_df.reset_index()
-                                _sbm_df.loc[len(sbm_df)] = [i, j, 1] # [row idx, col idx, val] 
-                                sbm_df = _sbm_df.set_index(["row", "col"])
-                            elif not (i, val[0]) in sbm_df.index and (i, j) in sbm_df.index:
-                                # 0 + 1 case
-                                sbm_df.loc[i, j] = 1
-                            else:
-                                # 0 + 0 case
-                                pass
-
-            lowest_row_idx_dict = self._get_lowest_row_idx_dict(sbm_df)
-            freq_of_low_dict = self._get_freq_of_low_dict(lowest_row_idx_dict)
-            _counter += 1
-
-        sbm_reduced = self._sbm_df_to_sbm_dict(sbm_df)
-        return sbm_reduced
-
-class BoundaryMatrixReducer(object):
-    """This class is for dense format boundary matrix.
-    """
-    def __init__(self, verbose: bool=True):
-        self._verbose = verbose # for debug
-
-    def _get_lowest_row_idx(self, bm: list, column_idx: int) -> int:
-        """
-        Returns
-        -------
-        lowest_row_idx : int or None
-            None if the column has only 0 
-        """
-        N = len(bm)
-        lowest_row_idx = None
-        for i in range(1, N):
-            if bm[N-i][column_idx] == 0:
+        # convert format
+        sbm_col2row_reduced = {}
+        for col_idx, row_indices in enumerate(sbm):
+            if len(row_indices) == 0:
                 continue
-            else:
-                lowest_row_idx = N - i
-                break
+            sbm_col2row_reduced[col_idx] = row_indices
+        
+        return sbm_col2row_reduced
 
-        return lowest_row_idx
-
-    def _get_freq_of_low_dict(self, boundary_matrix: list) -> dict:
+    def reduce2(self, sbm_col2row: list, return_copy=True) -> dict:
         """
         Parameters
         ----------
-        boundary_matrix : list
-        In [3]: boundary_matrix
-        Out[3]:
-        [[0, 0, 0, 1, 0, 1, 0],
-        [0, 0, 0, 1, 1, 0, 0],
-        [0, 0, 0, 0, 1, 1, 0],
-        [0, 0, 0, 0, 0, 0, 1],
-        [0, 0, 0, 0, 0, 0, 1],
-        [0, 0, 0, 0, 0, 0, 1],
-        [0, 0, 0, 0, 0, 0, 0]]
+        sbm_col2row : dict
+        return_copy: bool
+            It returns a different dict object if True.
+            It copies input sbm, then update it if False.
 
-        Returns
+        Example
         -------
-        freq_of_low_dict : dict
-        key : lowest row index
-        value : list of column indices of boundary matrix whose lowest row index is key
+        from persistence.persistence import read_filtration
+        from persistence.boundary_matrix import get_sparse_boundary_matrix
+        from persistence.reduce_boundary_matrix import SparseBoundaryMatrixReducer
 
-        In [2]: freq_of_low_dict
-        Out[2]: {1: [3], 2: [4, 5], 5: [6]}
+        filename = "./filtrations/filtration_A.txt"
+
+        filtration = read_filtration(filename)
+        sbm_col2row = get_sparse_boundary_matrix(filtration)
+        sbm_reducer = SparseBoundaryMatrixReducer()
+        sbm_reduced_2 = sbm_reducer.reduce2(sbm_col2row_2)
+
+        Notes
+        -----
+        The reduce2 searches columns to add by col-wise
         """
-        if self._verbose:
-            print("--- BoundaryMatrixReducer._get_freq_of_low_dict ---")
+        _sbm_col2row = copy.deepcopy(sbm_col2row) if return_copy else sbm_col2row
 
-        lowest_row_list = [self._get_lowest_row_idx(boundary_matrix, column_idx) for column_idx in range(len(boundary_matrix))]
-        freq_of_low_dict = {}
+        print("reduce: making row2col dict")
+        row2col = sbm_col2row_to_row2col(_sbm_col2row)
 
-        for i, val in enumerate(lowest_row_list):
-            if val is not None:
-                if val in freq_of_low_dict:
-                    freq_of_low_dict[val].append(i)
-                else:
-                    freq_of_low_dict[val] = [i]
-        return freq_of_low_dict
-    
-    def reduce(self, boundary_matrix: list, return_copy: bool=False) -> list:
-        if return_copy: # for debug
-            _bm = copy.deepcopy(boundary_matrix)
-        else:
-            _bm = boundary_matrix
-
-        freq_of_low_dict = self._get_freq_of_low_dict(_bm)
-
-        _counter = 0
-        while max(list(map(len, freq_of_low_dict.values()))) > 1:
+        col_indices = list(_sbm_col2row.keys())
+        for _counter, j in enumerate(col_indices):
             if self._verbose:
-                print(f"---{_counter}---")
-                print(freq_of_low_dict)
+                print(f"reduce: {_counter}/{len(col_indices)}")
 
-            for key, val in freq_of_low_dict.items():
-                if len(val) > 1:
-                    for j in val[1:]:
-                        for i in range(len(_bm)):
-                            _bm[i][j] = _bm[i][val[0]] + _bm[i][j] # _bm[row idx][column idx]
-                            if _bm[i][j] > 1:
-                                _bm[i][j] = 0
+            if j in _sbm_col2row:
+                i = max(_sbm_col2row[j])
+            else:
+                continue # In this case, j col became all zeros after some addition
 
-            freq_of_low_dict = self._get_freq_of_low_dict(_bm)
-            _counter += 1
-        
-        return _bm
+            col_indices_to_add = sorted([_col_idx for _col_idx in row2col[i] if j < _col_idx])
+            # print(f"number of col_indices_to_add: {len(col_indices_to_add)}")
+            for col_idx_to_add in col_indices_to_add:
+                if j == col_idx_to_add:
+                    breakpoint()
+                nonzero_rows_at_j_col = _sbm_col2row[j] if j in _sbm_col2row else set()
+                nonzero_rows_at_col_to_add = _sbm_col2row[col_idx_to_add] if col_idx_to_add in _sbm_col2row else set()
+                xor = nonzero_rows_at_j_col ^ nonzero_rows_at_col_to_add
+                new_nonzero_rows = xor - nonzero_rows_at_col_to_add # the rows to be apdated from 0 to 1 at col_idx_to_add-th col
+                new_zero_rows = nonzero_rows_at_j_col & nonzero_rows_at_col_to_add# the rows to be apdated from 1 to 0 at col_idx_to_add-th col
+
+                if self._verbose:
+                    print(f"j: {j}")
+                    print(f"i (lowest row idx): {i}")
+                    print(f"col_idx_to_add: {col_idx_to_add}")
+                    print(f"nonzero_rows_at_j_col: {nonzero_rows_at_j_col}")
+                    print(f"nonzero_rows_at_col_to_add: {nonzero_rows_at_col_to_add}")
+                    print(f"xor: {xor}")
+                    print(f"new_nonzero_rows: {new_nonzero_rows}")
+                    print(f"new_zero_rows: {new_zero_rows}")
+                    print(f"_sbm_col2row before update: {_sbm_col2row}")
+                    print(f"row2col before update: {row2col}") 
+
+                # update col2row
+                if len(xor) == 0:
+                    # became all zero column
+                    if col_idx_to_add in _sbm_col2row:
+                        _sbm_col2row.pop(col_idx_to_add)
+                else:
+                    _sbm_col2row[col_idx_to_add] = xor
+
+                if self._verbose:
+                    print(f"_sbm_col2row after update: {_sbm_col2row}")
+
+                # update row2col
+                for row_idx in new_zero_rows:
+                    row2col[row_idx].remove(col_idx_to_add)
+
+                for row_idx in new_nonzero_rows:
+                    row2col[row_idx].add(col_idx_to_add)
+
+                if self._verbose:
+                    print(f"row2col after update: {row2col}")
+
+        return _sbm_col2row
