@@ -11,9 +11,9 @@ filename = "./tests/testcases/filtration_2.txt"
 
 filtration = read_filtration(filename)
 sbm_col2row = get_sparse_boundary_matrix(filtration)
-sbm_reducer = SparseBoundaryMatrixReducer()
-# sbm_col2row_reduced = sbm_reducer.reduce2(sbm_col2row)
-sbm_col2row_reduced = sbm_reducer.reduce1(sbm_col2row)
+sbm_reducer = SparseBoundaryMatrixReducer(verbose=True)
+sbm_col2row_reduced = sbm_reducer.reduce2(sbm_col2row)
+# sbm_col2row_reduced = sbm_reducer.reduce1(sbm_col2row)
 
 
 

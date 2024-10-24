@@ -87,7 +87,8 @@ class SparseBoundaryMatrixReducer(object):
 
         col_indices = list(_sbm_col2row.keys())
         for _counter, j in enumerate(col_indices):
-            # print(f"reduce: {_counter}/{len(col_indices)}")
+            if self._verbose:
+                print(f"reduce: {_counter}/{len(col_indices)}")
 
             if j in _sbm_col2row:
                 i = max(_sbm_col2row[j])
@@ -95,26 +96,48 @@ class SparseBoundaryMatrixReducer(object):
                 continue # In this case, j col became all zeros after some addition
 
             col_indices_to_add = [_col_idx for _col_idx in row2col[i] if j < _col_idx]
-            col_indices_to_add = list(row2col[i])[1:]
+            col_indices_to_add = sorted(list(row2col[i]))[1:]
             print(f"number of col_indices_to_add: {len(col_indices_to_add)}")
             for col_idx_to_add in col_indices_to_add:
+                if j == col_idx_to_add:
+                    breakpoint()
                 nonzero_rows_at_j_col = _sbm_col2row[j] if j in _sbm_col2row else set()
                 nonzero_rows_at_col_to_add = _sbm_col2row[col_idx_to_add] if col_idx_to_add in _sbm_col2row else set()
                 xor = nonzero_rows_at_j_col ^ nonzero_rows_at_col_to_add
-                new_nonzero_rows = xor - nonzero_rows_at_col_to_add
+                new_nonzero_rows = xor - nonzero_rows_at_col_to_add # the rows to be apdated from 0 to 1 at col_idx_to_add-th col
+                new_zero_rows = nonzero_rows_at_j_col & nonzero_rows_at_col_to_add# the rows to be apdated from 1 to 0 at col_idx_to_add-th col
+
+                if self._verbose:
+                    print(f"j: {j}")
+                    print(f"i (lowest row idx): {i}")
+                    print(f"col_idx_to_add: {col_idx_to_add}")
+                    print(f"nonzero_rows_at_j_col: {nonzero_rows_at_j_col}")
+                    print(f"nonzero_rows_at_col_to_add: {nonzero_rows_at_col_to_add}")
+                    print(f"xor: {xor}")
+                    print(f"new_nonzero_rows: {new_nonzero_rows}")
+                    print(f"new_zero_rows: {new_zero_rows}")
+                    print(f"_sbm_col2row before update: {_sbm_col2row}")
+                    print(f"row2col before update: {row2col}") 
 
                 # update col2row
                 if len(xor) == 0:
+                    # became all zero column
                     if col_idx_to_add in _sbm_col2row:
                         _sbm_col2row.pop(col_idx_to_add)
                 else:
                     _sbm_col2row[col_idx_to_add] = xor
 
+                if self._verbose:
+                    print(f"_sbm_col2row after update: {_sbm_col2row}")
+
                 # update row2col
+                for row_idx in new_zero_rows:
+                    row2col[row_idx].remove(col_idx_to_add)
+
                 for row_idx in new_nonzero_rows:
-                    if col_idx_to_add in row2col[row_idx]:
-                        row2col[row_idx].remove(col_idx_to_add)
-                    else:
-                        row2col[row_idx].add(col_idx_to_add)
+                    row2col[row_idx].add(col_idx_to_add)
+
+                if self._verbose:
+                    print(f"row2col after update: {row2col}")
 
         return _sbm_col2row
