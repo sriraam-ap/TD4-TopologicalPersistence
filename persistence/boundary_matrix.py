@@ -39,6 +39,8 @@ def get_sparse_boundary_matrix(filtration: list) -> dict:
 
 def sparse2dense(sbm_col2row: dict) -> list:
     """
+    Parameters
+    ----------
     sbm_col2row : dict
     bm_dense : list
     In [29]: bm_dense

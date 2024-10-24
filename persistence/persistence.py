@@ -17,6 +17,22 @@ class Simplex:
         return f"{{val={self.val}; dim={self.dim}; {sorted(self.vert)}}}\n"
 
 def read_filtration(filename: str) -> List[Simplex]:
+    """
+    Parameters
+    ----------
+    filename : str
+    Ex. filename = "./filtrations/filtration_A.txt"
+
+    Returns
+    -------
+    filtration : list
+    In [2]: filtration
+    Out[2]:
+    [<persistence.persistence.Simplex at 0x7fdc3571c650>,
+    <persistence.persistence.Simplex at 0x7fdc35801f10>,
+    <persistence.persistence.Simplex at 0x7fdc35802110>,
+    ...
+    """
     filtration = []
     # Set locale to ensure consistent float number parsing (for example with commas)
     locale.setlocale(locale.LC_NUMERIC, 'en_US.UTF-8')

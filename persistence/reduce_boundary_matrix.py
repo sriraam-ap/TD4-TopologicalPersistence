@@ -1,7 +1,5 @@
 import copy
 
-import pandas as pd
-
 from .boundary_matrix import sbm_col2row_to_row2col
 
 
