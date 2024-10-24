@@ -9,7 +9,7 @@ class SparseBoundaryMatrixReducer(object):
     def __init__(self, verbose: bool=True):
         self._verbose = verbose # for debug
 
-    def reduce1(self, sbm_col2row: dict) -> dict:
+    def reduce1(self, sbm_col2row: dict, return_copy=True) -> dict:
         """
         We will change input and output format but now it's like below
 
@@ -20,10 +20,14 @@ class SparseBoundaryMatrixReducer(object):
         output
         In [2]: sbm_reduced
         Out[2]: [set(), set(), set(), {0, 1}, {1, 2}, {0, 2}, {3, 4, 5}]
+
+        The reduce1 searches columns to add by row-wise
         """
-        sbm = [set() for _ in range(max(sbm_col2row.keys())+1)]
-        for j in sbm_col2row.keys():
-            sbm[j] = sbm_col2row[j]
+        _sbm_col2row = copy.deepcopy(sbm_col2row) if return_copy else sbm_col2row
+
+        sbm = [set() for _ in range(max(_sbm_col2row.keys())+1)]
+        for j in _sbm_col2row.keys():
+            sbm[j] = _sbm_col2row[j]
 
         n = len(sbm)
         previous_pivots_column = [None] * n
@@ -39,11 +43,17 @@ class SparseBoundaryMatrixReducer(object):
                     previous_pivots_column[pivot_row_index] = j
                     break
 
-                j_col = j_col ^ sbm[previous_pivots_column[pivot_row_index]]
+                j_col ^= sbm[previous_pivots_column[pivot_row_index]]
+
+        # convert format
+        sbm_col2row_reduced = {}
+        for col_idx, row_indices in enumerate(sbm):
+            if len(row_indices) == 0:
+                continue
+            sbm_col2row_reduced[col_idx] = row_indices
         
-        return sbm
-                
-    
+        return sbm_col2row_reduced
+
     def reduce2(self, sbm_col2row: list, return_copy=True) -> dict:
         """
         Parameters
@@ -55,9 +65,22 @@ class SparseBoundaryMatrixReducer(object):
 
         Example
         -------
+        from persistence.persistence import read_filtration
+        from persistence.boundary_matrix import get_sparse_boundary_matrix
+        from persistence.reduce_boundary_matrix import SparseBoundaryMatrixReducer
 
+        filename = "./filtrations/filtration_A.txt"
+
+        filtration = read_filtration(filename)
+        sbm_col2row = get_sparse_boundary_matrix(filtration)
+        sbm_reducer = SparseBoundaryMatrixReducer()
+        sbm_reduced_2 = sbm_reducer.reduce2(sbm_col2row_2)
+
+        Notes
+        -----
+        The reduce2 searches columns to add by col-wise
         """
-        _sbm_col2row = sbm_col2row.copy() if return_copy else sbm_col2row
+        _sbm_col2row = copy.deepcopy(sbm_col2row) if return_copy else sbm_col2row
 
         print("reduce: making row2col dict")
         row2col = sbm_col2row_to_row2col(_sbm_col2row)

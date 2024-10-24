@@ -1,10 +1,51 @@
+from persistence.persistence import read_filtration
+from persistence.boundary_matrix import get_sparse_boundary_matrix
+from persistence.reduce_boundary_matrix import SparseBoundaryMatrixReducer
+
+# filename = "./tests/testcases/filtration_1.txt"
+filename = "./tests/testcases/filtration_2.txt"
+# filename = "./filtrations/filtration_A.txt"
+# filename = "./filtrations/filtration_B.txt"
+# filename = "./filtrations/filtration_C.txt"
+# filename = "./filtrations/filtration_D.txt"
+
+filtration = read_filtration(filename)
+sbm_col2row = get_sparse_boundary_matrix(filtration)
+sbm_reducer = SparseBoundaryMatrixReducer()
+# sbm_col2row_reduced = sbm_reducer.reduce2(sbm_col2row)
+sbm_col2row_reduced = sbm_reducer.reduce1(sbm_col2row)
+
+
+
+
+
+from persistence.boundary_matrix import sparse2dense
+sparse2dense(sbm_col2row)
+
+sparse2dense(sbm_col2row_reduced)
+
+
+from persistence.compute_barcode import compute_barcode
+barcode_list = compute_barcode(filtration, sbm_col2row_reduced)
+
+output_filename = "./outputs/barcode.txt"
+
+from pathlib import Path
+
+barcode_output_savedir = "./outputs/barcodes"
+
+
+
+
+
+
+
+####
+
 import pandas as pd
 
 from persistence.persistence import read_filtration
-from persistence.persistence import convert_filtration_df
-from persistence.boundary_matrix import get_boundary_matrix
 from persistence.boundary_matrix import get_sparse_boundary_matrix
-from persistence.reduce_boundary_matrix import BoundaryMatrixReducer
 
 
 # filtration = read_filtration("./filtrations/filtration_A.txt")
