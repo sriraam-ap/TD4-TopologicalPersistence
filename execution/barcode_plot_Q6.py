@@ -68,6 +68,7 @@ def sort_filtration(filtration):
 # filename = "./filtrations/projective_plane.txt"
 # filenames = ["./filtrations/moebius.txt", "./filtrations/torus.txt", "./filtrations/klein_bottle.txt", "./filtrations/projective_plane.txt"]
 
+savedir = "./outputs/barcode_Q6"
 filtrations_path = "./filtrations/filtrations2"
 filtrations_p = Path(filtrations_path)
 
@@ -86,7 +87,6 @@ for filename_p in filtrations_p.iterdir():
 
     thre_to_plot = 0.0
     is_logscale = False
-    savedir = "./outputs/barcode_Q5"
     savedir_p = Path(savedir)
     savedir_p.mkdir(exist_ok=True)
     name = Path(filename).name.split(".")[0]
