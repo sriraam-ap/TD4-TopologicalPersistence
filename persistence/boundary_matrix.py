@@ -26,6 +26,7 @@ def get_sparse_boundary_matrix(filtration: list) -> dict:
     10003: {4806, 9998},
     ...}
     """
+    print("--- get_sparse_boundary_matrix start ---")
     dim_list = [s.dim for s in filtration]
     val_list = [s.val for s in filtration]
     vert_list = [frozenset(s.vert) for s in filtration]
@@ -33,6 +34,7 @@ def get_sparse_boundary_matrix(filtration: list) -> dict:
     df_sorted = df.sort_values(by=['val', 'dim'])
     vert2idx = {vert: i for i, vert in enumerate(df_sorted.vert.values)}
     sbm_col2row = {j: {vert2idx[frozenset(b)] for b in combinations(vert, len(vert)-1)} for j, vert in enumerate(df_sorted.vert.values) if len(vert) > 1}
+    print("--- get_sparse_boundary_matrix finished ---")
     return sbm_col2row
 
 def sparse2dense(sbm_col2row: dict) -> list:

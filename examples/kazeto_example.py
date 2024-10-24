@@ -33,9 +33,47 @@ filtration = read_filtration("./filtrations/filtration_D.txt")
 # filtration = read_filtration("./tests/testcases/filtration_1.txt")
 sbm_col2row = get_sparse_boundary_matrix(filtration)
 # row2col = sbm_col2row_to_row2col(sbm_col2row)
-sbm_reducer = SparseBoundaryMatrixReducer()
-sbm_col2row_reduced = sbm_reducer.reduce(sbm_col2row)
+# sbm_reducer = SparseBoundaryMatrixReducer()
+# sbm_col2row_reduced = sbm_reducer.reduce(sbm_col2row)
 # sbm_reduced = sbm_col2row_to_sbm_list(sbm_col2row_reduced)
+
+# D: get bm 36s, 33s
+
+sbm = [set() for _ in range(len(filtration))]
+for j in sbm_col2row.keys():
+    sbm[j] = sbm_col2row[j]
+del sbm_col2row
+
+
+sbm_col2row[10994]
+sbm[10994]
+
+# 
+# list ver
+# filtration_D.txt
+# 1800000/2716431 8m31s
+# 2158038/2716431 15m00s
+# 2159882/2716431 18m00s
+# 2161271/2716431 21m00s
+# 2164428/2716431 28m00
+
+n = len(sbm)
+previous_pivots_column = [None] * n
+
+for j in range(len(sbm)):
+    print(f"{j}/{n}")
+    j_col = sbm[j]
+    while j_col:
+        pivot_row_index = max(j_col)
+        # print(f"j: {j}, pivot_row_index: {pivot_row_index}")
+
+        if previous_pivots_column[pivot_row_index] is None:
+            previous_pivots_column[pivot_row_index] = j
+            break
+
+        j_col = j_col ^ sbm[previous_pivots_column[pivot_row_index]]
+        
+
 
 
         
