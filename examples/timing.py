@@ -22,11 +22,11 @@ for filename in filenames:
 
     # make boundary matrix
     sbm_col2row = get_sparse_boundary_matrix(filtration)
-    sbm_reducer = SparseBoundaryMatrixReducer()
+    sbm_reducer = SparseBoundaryMatrixReducer(verbose=False)
 
     # reduce boundary matrix
-    sbm_col2row_reduced = sbm_reducer.reduce1(sbm_col2row)
-    # sbm_col2row_reduced = sbm_reducer.reduce2(sbm_col2row)
+    # sbm_col2row_reduced = sbm_reducer.reduce1(sbm_col2row)
+    sbm_col2row_reduced = sbm_reducer.reduce2(sbm_col2row)
 
     # compute barcode
     barcode_list = compute_barcode(filtration, sbm_col2row_reduced)

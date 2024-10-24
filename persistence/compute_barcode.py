@@ -52,9 +52,14 @@ def compute_barcode(filtration, sbm_col2row_reduced: dict, verbose: bool=False) 
             print(f"s_idx: {s_idx}")
 
         if s_idx in pivots_set:
+            if not s_idx in pivot_row2col :
+                breakpoint()
+
             death = filtration[pivot_row2col[s_idx]].val
+
             if verbose:
                 print("pivot_row2col[s_idx]: ", pivot_row2col[s_idx])
+
             simplex_indices.remove(pivot_row2col[s_idx])
         else:
             death = float('inf')

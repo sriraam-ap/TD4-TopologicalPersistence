@@ -95,9 +95,8 @@ class SparseBoundaryMatrixReducer(object):
             else:
                 continue # In this case, j col became all zeros after some addition
 
-            col_indices_to_add = [_col_idx for _col_idx in row2col[i] if j < _col_idx]
-            col_indices_to_add = sorted(list(row2col[i]))[1:]
-            print(f"number of col_indices_to_add: {len(col_indices_to_add)}")
+            col_indices_to_add = sorted([_col_idx for _col_idx in row2col[i] if j < _col_idx])
+            # print(f"number of col_indices_to_add: {len(col_indices_to_add)}")
             for col_idx_to_add in col_indices_to_add:
                 if j == col_idx_to_add:
                     breakpoint()
