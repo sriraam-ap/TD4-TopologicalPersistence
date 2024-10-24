@@ -2,8 +2,8 @@ from persistence.persistence import read_filtration
 from persistence.boundary_matrix import get_sparse_boundary_matrix
 from persistence.reduce_boundary_matrix import SparseBoundaryMatrixReducer
 
-# filename = "./tests/testcases/filtration_1.txt"
-filename = "./tests/testcases/filtration_2.txt"
+filename = "./tests/testcases/filtration_1.txt"
+# filename = "./tests/testcases/filtration_2.txt"
 # filename = "./filtrations/filtration_A.txt"
 # filename = "./filtrations/filtration_B.txt"
 # filename = "./filtrations/filtration_C.txt"
