@@ -31,9 +31,9 @@ def plot_barcode(data, max_death=10):
         for j, (dim, birth, death) in enumerate(homology_group):
             if death == np.inf:
                 death = max_death  # Cap infinite death times at max_death
-                ax.plot([np.log(birth), np.log(death)], [j + offset] * 2, lw=2, color=colors[i], linestyle='dashed')  # Dashed line for infinite persistence
+                ax.plot([birth, death], [j + offset] * 2, lw=2, color=colors[i], linestyle='dashed')  # Dashed line for infinite persistence
             else:
-                ax.plot([np.log(birth), np.log(death)], [j + offset] * 2, lw=2, color=colors[i])  # Solid line for finite persistence
+                ax.plot([birth, death], [j + offset] * 2, lw=2, color=colors[i])  # Solid line for finite persistence
     
     # Set the labels and title
     ax.set_yticks([])  # Hide y-axis labels as they're just indices
@@ -52,7 +52,7 @@ def plot_barcode(data, max_death=10):
 
     # Display the plot
     # plt.show()
-    plt.savefig("./outputs/fig.png")
+    plt.savefig("./outputs/fig_generated_by_barcode_plot.png")
 
 
 
