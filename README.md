@@ -30,10 +30,6 @@ kazetof@inspiron:~/Works/IPParis/TDA/TD4/TD4-TopologicalPersistence$ tree
 .
 ├── LICENSE
 ├── README.md
-├── drafts # This directory does not relate to submittion.
-│   ├── _kazeto_example.py
-│   ├── barcode.txt
-│   └── example.py
 ├── execution
 │   └── main.py # code for timing from reading data to computing barcode
 ├── filtrations # directoru for data

@@ -8,7 +8,9 @@ class SparseBoundaryMatrixReducer(object):
         self._verbose = verbose # for debug
 
     def reduce1(self, sbm_col2row: dict, return_copy=True) -> dict:
-        """
+        """Use reduce2 method.
+        The reduce1 is just for comparing two slightly different reduction algorithm.
+
         We will change input and output format but now it's like below
 
         input

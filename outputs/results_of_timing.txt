@@ -1,0 +1,3 @@
+filename: ./filtrations/filtration_A.txt, elapsed time: 33.23028755187988 sec
+filename: ./filtrations/filtration_B.txt, elapsed time: 7.457912445068359 sec
+filename: ./filtrations/filtration_C.txt, elapsed time: 9.341071367263794 sec
