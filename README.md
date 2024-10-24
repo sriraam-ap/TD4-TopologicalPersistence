@@ -12,6 +12,7 @@ Emails for project submission:
     - pytest # No need to install if you do not run test code.
 
 # Tests
+This test code is optional for running code of Q1-Q4.
 Run following code on the project root directory after installing pytest.
 
 ```
@@ -53,7 +54,7 @@ kazetof@inspiron:~/Works/IPParis/TDA/TD4/TD4-TopologicalPersistence$ tree
 │   ├── persistence.py
 │   └── reduce_boundary_matrix.py
 ├── requirements.txt
-└── tests
+└── tests # test code is optional for TD, you can run the code without this directory.
     ├── test_boundary_matrix.py
     ├── test_reduce_boundary_matrix.py
     └── testcases
