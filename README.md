@@ -62,7 +62,7 @@ kazetof@inspiron:~/Works/IPParis/TDA/TD4/TD4-TopologicalPersistence$ tree
 ```
 
 # How to execute
-1. Put filtrations data in filtrations directories with the names of "filtration_A.txt", "filtration_B.txt", "filtration_C.txt", and "filtration_D.txt".
+1. Put filtrations data in filtrations directories with the names of `filtration_A.txt`, `filtration_B.txt`, `filtration_C.txt`, and `filtration_D.txt`.
 2. to run timing code, execute `main.py` like below on the project root directory.
 3. You have generated barcodes in `outputs/barcode` and timing result in `outputs/results_of_timing.txt`
 
